@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width" />
+    <title>Tesseract</title>
+</head>
+
+<body>
+    <p>
+    <div class="stopaplay" onclick="stopaplay()">
+        <div>◼︎</div>stop all
+    </div>
+    </p>
+    <p>
+    <div id="a1x" class="aplay" onclick="aplay(this)">
+        <div>▶</div>angle x
+    </div>
+    <div id="a1y" class="aplay" onclick="aplay(this)">
+        <div>▶</div>angle y
+    </div>
+    <div id="a1z" class="aplay" onclick="aplay(this)">
+        <div>▶</div>angle z
+    </div>
+    </p>
+    <p>
+    <div id="a2x" class="aplay" onclick="aplay(this)">
+        <div>▶</div>angle x
+    </div>
+    <div id="a2y" class="aplay" onclick="aplay(this)">
+        <div>▶</div>angle y
+    </div>
+    <div id="a2z" class="aplay" onclick="aplay(this)">
+        <div>▶</div>angle z
+    </div>
+    </p>
+    <canvas id="canvas" width="512px" height="512px" style="border: 1px solid #ccc;"></canvas>
+
+
+    <script>
+        var alist = { //angles
+            "a1x": 0,
+            "a1y": 0,
+            "a1z": 0,
+            "a2x": 0,
+            "a2y": 0,
+            "a2z": 0,
+        },
+            plist = [[0, 0, 0, 0], [0, 0, 100, 0], [0, 100, 0, 0], [0, 100, 100, 0], [100, 0, 0, 0], [100, 0, 100, 0], [100, 100, 0, 0], [100, 100, 100, 0], [0, 0, 0, 100], [0, 0, 100, 100], [0, 100, 0, 100], [0, 100, 100, 100], [100, 0, 0, 100], [100, 0, 100, 100], [100, 100, 0, 100], [100, 100, 100, 100]], //points
+            llist = [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [3, 7], [4, 5], [4, 6], [5, 7], [6, 7], [8, 9], [8, 10], [8, 12], [9, 11], [9, 13], [10, 11], [10, 14], [11, 15], [12, 13], [12, 14], [13, 15], [14, 15], [0, 8], [1, 9], [2, 10], [3, 11], [4, 12], [5, 13], [6, 14], [7, 15]] //lines
+
+        window.onload = () => {
+            setInterval(() => {
+                aupdate();
+                draw();
+            }, 1000 / 60);
+        }
+
+        function stopaplay() {
+            Array.from(document.getElementsByClassName("aplay")).forEach(e => { if (e.classList.contains("active")) e.classList.remove("active"); })
+        }
+
+        function aupdate() {
+            Array.from(document.getElementsByClassName("active")).forEach(e => {
+                alist[e.id] += alist[e.id] >= 2 * Math.PI ? -alist[e.id] : Math.PI / 120;
+            });
+        }
+
+        function draw() {
+            var c = document.getElementById("canvas"),
+                ctx = c.getContext("2d"),
+                prlist = [],
+                prrlist = [];
+            ctx.clearRect(0, 0, c.width, c.height);
+
+            //rotation1
+            plist.forEach(p => {
+                prlist.push(rotate(p, alist["a1x"], alist["a1y"], alist["a1z"]));
+            })
+
+            //projection1 & rotation2
+            prlist.forEach(p => {
+
+                p.splice(2, 1);
+                prrlist.push(rotate(p, alist["a2x"], alist["a2y"], alist["a2z"]));
+            })
+
+            llist.forEach(lpair => {
+                ctx.beginPath();
+                ctx.moveTo(256 + prrlist[lpair[0]][0], 256 + prrlist[lpair[0]][1]);
+                ctx.lineTo(256 + prrlist[lpair[1]][0], 256 + prrlist[lpair[1]][1]);
+                ctx.strokeStyle = "#000";
+                ctx.stroke();
+            })
+        }
+
+        function aplay(e) {
+            if (e.classList.contains("active")) e.classList.remove("active");
+            else e.classList.add("active");
+        }
+    </script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.4.0/math.js"></script>
+
+    <script>
+        function sin(x) {
+            return math.sin(x);
+        }
+        function cos(x) {
+            return math.cos(x);
+        }
+        function mul(x, y) {
+            return math.multiply(x, y);
+        }
+
+        function rotate(p, ax, ay, az) {
+            var mx = [[1, 0, 0], [0, cos(ax), -sin(ax)], [0, sin(ax), cos(ax)]],
+                my = [[cos(ay), 0, sin(ay)], [0, 1, 0], [-sin(ay), 0, cos(ay)]],
+                mz = [[cos(az), -sin(az), 0], [sin(az), cos(az), 0], [0, 0, 1]],
+                pr = mul(mz, mul(my, mul(mx, [[p[0]], [p[1]], [p[2]]])));
+            return [pr[0][0], pr[1][0], pr[2][0]].concat(p.slice(3));
+        }
+    </script>
+
+    <style>
+        .aplay,
+        .stopaplay {
+            user-select: none;
+            border: 1px solid #000;
+            display: inline-block;
+            padding: 5px 10px;
+        }
+
+        .aplay>div,
+        .stopaplay>div {
+            display: inline-block;
+            padding-right: 5px;
+        }
+
+        .aplay.active {
+            border: 1px solid #1e90ff;
+            background-color: #d3e9ff;
+        }
+    </style>
+</body>
+
+</html>
