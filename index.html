@@ -3,10 +3,13 @@
 
 <head>
     <meta charset="UTF-8" name="viewport" content="width=device-width" />
-    <title>Tesseract</title>
+    <title>Rotating Tesseract</title>
 </head>
 
 <body>
+    <h1>Rotating Tesseract</h1>
+    A simple website showing a tesseract with rotation.
+    <a href="https://github.com/kqakqakqa/rotating-tesseract">View it on GitHub</a>
     <p>
     <div class="stopaplay" onclick="stopaplay()">
         <div>◼︎</div>stop all
@@ -127,6 +130,7 @@
         .stopaplay {
             user-select: none;
             border: 1px solid #000;
+            border-radius: 3px;
             display: inline-block;
             padding: 5px 10px;
         }
@@ -140,6 +144,10 @@
         .aplay.active {
             border: 1px solid #1e90ff;
             background-color: #d3e9ff;
+        }
+
+        h1 {
+            font-weight: normal;
         }
     </style>
 </body>
